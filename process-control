@@ -1,0 +1,45 @@
+#!/bin/bash
+check=`id -u`
+if(($check != 0))
+	then
+	sleep 1
+	echo "Are you Root !!"
+	sleep 1
+	echo $"please try sudo ./processcontrol.sh  or su -c \"./processcontrol.sh\""
+else
+
+#ps -Ao comm --sort -rss | uniq |head -n 20 # select process by most memory usage
+#ps -Ao comm --sort -rss | uniq |head -n 20 > /tmp/tmp.dat
+ps -Ao comm --sort -rss | uniq |head -n 21 |nl -s ':' -v 0 > /tmp/tmp.dat
+cat /tmp/tmp.dat
+read -p "Enter Process Number:" pnum
+
+s=':'
+ss=' '
+#pid = `cat /tmp/tmp.dat |grep  1:` #|cut -f 2 -d :|cut -f 1 -d `
+
+name=`cat /tmp/tmp.dat| grep ' '$pnum':'|cut -f 2 -d $s|cut -f 1 -d ' '`
+pid=`pgrep $name`
+echo "you have selected "$name" ,pid="$pid
+
+read -p $'(1) get informatio about process \n(2) change priority \n(3) send kill signals\nselect your choise:' selct
+#echo $selct
+if (($selct == 1))
+	then
+	ps -o pid,tty,comm,stat,time,nice,cpu,rss $pid
+elif (($selct == 2))
+	then
+ 	read -p "select new priority [0-20] :" nice
+	renice  -n $nice -p $pid
+elif (($selct ==3))
+	then
+	kill -l
+	read -p $'\nselect single to conntinue :' signal
+	echo $pid
+	echo -$signal  $pid
+	kill -$signal  $pid
+else
+	echo "try again later .|."
+	
+fi
+fi
